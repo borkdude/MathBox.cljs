@@ -11,10 +11,10 @@
     org.mentat/leva.cljs      {:mvn/version "0.2.2"}
 
     io.github.nextjournal/clerk
-    {:git/sha "fad499407d979916d21b33cc7e46e73f7a485e37"}
+    {:git/sha "ef3023e148a783228f193e4ed95f30e18544e7ae"}
     io.github.nextjournal/clerk.render
     {:git/url "https://github.com/nextjournal/clerk"
-     :git/sha "fad499407d979916d21b33cc7e46e73f7a485e37"
+     :git/sha "ef3023e148a783228f193e4ed95f30e18544e7ae"
      :deps/root "render"}}
    :exec-fn user/build!}
 
