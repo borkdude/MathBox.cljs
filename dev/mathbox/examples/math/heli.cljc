@@ -48,9 +48,15 @@
     :r2 0.3
     :r3 0.1}))
 
-#?(:cljs
-   ;; hack to make the below work in cherry
-   (gobject/set js/globalThis "Config" leva.core/Config))
+(comment
+  (user/serve!)
+
+  )
+
+;; #?(:cljs
+;;    ;; hack to make the below work in cherry
+;;    (do (gobject/set js/globalThis "Config" leva.core/Config)
+;;        (gobject/set js/globalThis "Controls" leva.core/Controls)))
 
 (show-sci {:evaluator :cherry}
  [:<>

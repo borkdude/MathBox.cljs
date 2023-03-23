@@ -11,11 +11,12 @@
     org.mentat/leva.cljs      {:mvn/version "0.2.2"}
 
     io.github.nextjournal/clerk
-    {:git/sha "ef3023e148a783228f193e4ed95f30e18544e7ae"}
+    {:git/sha "aeea72fbf9976ad74b359fe0fa6e7e522f84aaee"}
     io.github.nextjournal/clerk.render
     {:git/url "https://github.com/nextjournal/clerk"
-     :git/sha "ef3023e148a783228f193e4ed95f30e18544e7ae"
+     :git/sha "aeea72fbf9976ad74b359fe0fa6e7e522f84aaee"
      :deps/root "render"}}
+   :jvm-opts ["-Dclerk.resource_manifest={\"/js/viewer.js\" \"/js/viewer.js\"}"]
    :exec-fn user/build!}
 
   :build
