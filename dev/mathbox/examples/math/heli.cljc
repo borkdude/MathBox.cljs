@@ -22,19 +22,27 @@
      [opts & exprs]
      (let [[opts exprs] (if (map? opts)
                           [opts exprs]
-                          [nil (cons opts exprs)])]
+                          [nil (cons opts exprs)])
+           [defns others]
+           ((juxt filter remove)
+            #(when (seq? %)
+               (= 'defn (first %)))
+            exprs)
+           render-fn (if (empty? others)
+                       `(do ~@defns)
+                       `(fn [_#]
+                         (let [result# (do ~@exprs)]
+                           (nextjournal.clerk.viewer/html
+                            (if (vector? result#)
+                              result#
+                              [nextjournal.clerk.render/inspect result#])))))]
        (when-not (:ns &env)
          `(clerk/with-viewer
             (merge {:transform-fn clerk/mark-presented
-                    :render-fn
-                    '(fn [_#]
-                       (let [result# (do ~@exprs)]
-                         (nextjournal.clerk.viewer/html
-                          (if (vector? result#)
-                            result#
-                            [nextjournal.clerk.render/inspect result#]))))}
+                    :render-fn '~render-fn}
                    ~opts)
-            {})))))
+            {})))
+     ))
 
 ;; # Helitorus
 
@@ -50,7 +58,7 @@
 
 (comment
   (user/serve!)
-
+  (clerk/clear-cache!)
   )
 
 ;; #?(:cljs
@@ -58,16 +66,16 @@
 ;;    (do (gobject/set js/globalThis "Config" leva.core/Config)
 ;;        (gobject/set js/globalThis "Controls" leva.core/Controls)))
 
-(show-sci {:evaluator :cherry}
- [:<>
-  [leva.core/Config {:drag true}]
-  [leva.core/Controls
-   {:atom !state
-    :schema
-    {:n {:min 0 :max 32 :step 1}
-     :r1 {:min 0 :max 3 :step 0.001}
-     :r2 {:min 0.0 :max 0.5 :step 0.01}
-     :r3 {:min 0.0 :max 0.2 :step 0.01}}}]])
+(show-sci #_{:evaluator :cherry}
+          [:<>
+           [leva.core/Config {:drag true}]
+           [leva.core/Controls
+            {:atom !state
+             :schema
+             {:n {:min 0 :max 32 :step 1}
+              :r1 {:min 0 :max 3 :step 0.001}
+              :r2 {:min 0.0 :max 0.5 :step 0.01}
+              :r3 {:min 0.0 :max 0.2 :step 0.01}}}]])
 
 
 ;; ## Code Emitter
@@ -337,43 +345,43 @@
 ;; NOTE that we have to do `cljs` to get back. Exports do not currently make it
 ;; through the show-cljs process.
 
-(show-sci
- (defn Helitorus [!state f]
-   [mathbox.core/MathBox
-    {:container {:style {:height "500px" :width "100%"}}
-     :threestrap
-     {:plugins ["core", "controls", "cursor", "mathbox" "stats"]}
-     :renderer {:background-color 0xffffff}
-     :scale 500
-     :focus 3}
-    [mathbox.primitives/Camera
-     {:proxy true
-      :position [1 1 3]}]
-    [mathbox.primitives/Cartesian
-     {:range [[-1 1] [-1 1] [-1 1]]
-      :scale [1 1 1]
-      :quaternion [0.7 0 0 0.7]}
-     [:div {:state @!state}
-      [mathbox.primitives/Area
-       {:rangeX [(- Math/PI) Math/PI]
-        :rangeY [(- Math/PI) Math/PI]
-        :width 512
-        :height 16
-        :channels 3
-        :live true
-        :expr (fn [emit theta phi _i _j _t]
-                (let [{:keys [r1 r2 r3 n]} (.-state !state)]
-                  (f emit r1 r2 r3 n theta phi)))}]]
-     [mathbox.primitives/Surface
-      {:shaded true
-       :color 0xcc0040
-       :lineY true
-       :width 1}]
+(show-sci {:evaluator :cherry}
+          (defn Helitorus [!state f]
+            [mathbox.core/MathBox
+             {:container {:style {:height "500px" :width "100%"}}
+              :threestrap
+              {:plugins ["core", "controls", "cursor", "mathbox" "stats"]}
+              :renderer {:background-color 0xffffff}
+              :scale 500
+              :focus 3}
+             [mathbox.primitives/Camera
+              {:proxy true
+               :position [1 1 3]}]
+             [mathbox.primitives/Cartesian
+              {:range [[-1 1] [-1 1] [-1 1]]
+               :scale [1 1 1]
+               :quaternion [0.7 0 0 0.7]}
+              [:div {:state @!state}
+               [mathbox.primitives/Area
+                {:rangeX [(- Math/PI) Math/PI]
+                 :rangeY [(- Math/PI) Math/PI]
+                 :width 512
+                 :height 16
+                 :channels 3
+                 :live true
+                 :expr (fn [emit theta phi _i _j _t]
+                         (let [{:keys [r1 r2 r3 n]} (.-state !state)]
+                           (f emit r1 r2 r3 n theta phi)))}]]
+              [mathbox.primitives/Surface
+               {:shaded true
+                :color 0xcc0040
+                :lineY true
+                :width 1}]
 
-     [mathbox.primitives/Resample {:height 5}]
-     [mathbox.primitives/Line
-      {:color 0xffffff
-       :width 2}]]]))
+              [mathbox.primitives/Resample {:height 5}]
+              [mathbox.primitives/Line
+               {:color 0xffffff
+                :width 2}]]]))
 
 ;; ## Animation
 
