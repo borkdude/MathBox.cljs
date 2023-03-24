@@ -30,13 +30,15 @@
             exprs)]
        (when-not (:ns &env)
          (let [render-fn (if (empty? others)
-                           `(do ~@defns)
-                           `(fn [_#]
-                              (let [result# (do ~@exprs)]
-                                result# #_(nextjournal.clerk.viewer/html
-                                 (if (vector? result#)
-                                   result#
-                                   [nextjournal.clerk.render/inspect result#])))))]
+                           `(do ~@defns
+                                (fn [_#]))
+                           `(do ~@defns
+                                (fn [_#]
+                                  (let [result# (do ~@others)]
+                                    (nextjournal.clerk.viewer/html
+                                     (if (vector? result#)
+                                       result#
+                                       [nextjournal.clerk.render/inspect result#]))))))]
            `(clerk/with-viewer
               (merge {:transform-fn clerk/mark-presented
                       :render-fn '~render-fn}
@@ -61,20 +63,11 @@
   (clerk/clear-cache!)
   )
 
-;; #?(:cljs
-;;    ;; hack to make the below work in cherry
-;;    (do (gobject/set js/globalThis "Config" leva.core/Config)
-;;        (gobject/set js/globalThis "Controls" leva.core/Controls)))
-
-(show-sci
- {:evaluator :cherry}
- [:p "Hello"])
-
-(show-sci {:evaluator :cherry}
+(show-sci {:evaluator :sci}
           [:<>
            [leva.core/Config {:drag true}]
            [leva.core/Controls
-            {:atom !state
+            {:atom  mathbox.examples.math.heli/!state
              :schema
              {:n {:min 0 :max 32 :step 1}
               :r1 {:min 0 :max 3 :step 0.001}
@@ -85,7 +78,7 @@
 ;; ## Code Emitter
 
 ^{::clerk/visibility :fold}
-(show-sci #_{:evaluator :cherry}
+(show-sci {:evaluator :cherry}
           (defn cake2
             [emit x63167 x63168 x63169 x63170 x63171 x63172]
             (let
@@ -385,10 +378,12 @@
               [mathbox.primitives/Resample {:height 5}]
               [mathbox.primitives/Line
                {:color 0xffffff
-                :width 2}]]]))
+                :width 2}]]])
+          (set! (.-Helitorus js/globalThis) Helitorus)
+          nil)
 
 ;; ## Animation
 
 ^{::clerk/width :wide}
-(show-sci
+(show-sci {:evaluator :cherry}
  [Helitorus !state cake2])
