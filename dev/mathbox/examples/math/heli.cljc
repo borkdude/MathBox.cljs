@@ -27,21 +27,21 @@
            ((juxt filter remove)
             #(when (seq? %)
                (= 'defn (first %)))
-            exprs)
-           render-fn (if (empty? others)
-                       `(do ~@defns)
-                       `(fn [_#]
-                         (let [result# (do ~@exprs)]
-                           (nextjournal.clerk.viewer/html
-                            (if (vector? result#)
-                              result#
-                              [nextjournal.clerk.render/inspect result#])))))]
+            exprs)]
        (when-not (:ns &env)
-         `(clerk/with-viewer
-            (merge {:transform-fn clerk/mark-presented
-                    :render-fn '~render-fn}
-                   ~opts)
-            {})))
+         (let [render-fn (if (empty? others)
+                           `(do ~@defns)
+                           `(fn [_#]
+                              (let [result# (do ~@exprs)]
+                                result# #_(nextjournal.clerk.viewer/html
+                                 (if (vector? result#)
+                                   result#
+                                   [nextjournal.clerk.render/inspect result#])))))]
+           `(clerk/with-viewer
+              (merge {:transform-fn clerk/mark-presented
+                      :render-fn '~render-fn}
+                     ~opts)
+              {}))))
      ))
 
 ;; # Helitorus
@@ -66,7 +66,11 @@
 ;;    (do (gobject/set js/globalThis "Config" leva.core/Config)
 ;;        (gobject/set js/globalThis "Controls" leva.core/Controls)))
 
-(show-sci #_{:evaluator :cherry}
+(show-sci
+ {:evaluator :cherry}
+ [:p "Hello"])
+
+(show-sci {:evaluator :cherry}
           [:<>
            [leva.core/Config {:drag true}]
            [leva.core/Controls
@@ -81,7 +85,7 @@
 ;; ## Code Emitter
 
 ^{::clerk/visibility :fold}
-(show-sci {:evaluator :cherry}
+(show-sci #_{:evaluator :cherry}
           (defn cake2
             [emit x63167 x63168 x63169 x63170 x63171 x63172]
             (let

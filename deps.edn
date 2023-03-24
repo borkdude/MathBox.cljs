@@ -11,11 +11,13 @@
     org.mentat/leva.cljs      {:mvn/version "0.2.2"}
 
     io.github.nextjournal/clerk
-    {:git/sha "73891f49e37bb21f3f4fffa152c3f7b0713f8d05"}
+    {:local/root "/Users/borkdude/dev/clerk"}
+    #_{:git/sha "73891f49e37bb21f3f4fffa152c3f7b0713f8d05"}
     io.github.nextjournal/clerk.render
-    {:git/url "https://github.com/nextjournal/clerk"
+    #_{:git/url "https://github.com/nextjournal/clerk"
      :git/sha "73891f49e37bb21f3f4fffa152c3f7b0713f8d05"
-     :deps/root "render"}
+       :deps/root "render"}
+    {:local/root "/Users/borkdude/dev/clerk/render"}
     io.github.squint-cljs/cherry {;; :git/sha "c1e04ad14a6ca8787b5fcaf645ff5e0372ac535d"
                                   :local/root "/Users/borkdude/dev/cherry"
                                   :exclusions [io.github.squint-cljs/squint]} #_{:git/sha "8e01c2c38eea3aba37431da54184dbfd2a3b3951"}
