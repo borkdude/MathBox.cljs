@@ -9,43 +9,6 @@
    #?(:cljs [leva.core :as leva.core]))
   #?(:cljs (:require-macros [mathbox.examples.math.heli :refer [show-sci]])))
 
-#?(:clj
-   (defmacro show-sci
-     "Returns a form that executes all `exprs` in Clerk's SCI environment and renders
-  the final form. If the final form evaluates to a vector, the vector is
-  interpreted as a Reagent component.
-  Else, the form is presented with `[nextjournal.clerk.viewer/inspect
-  form]`. (To present a vector, manually wrap the final form in
-  `[nextjournal.clerk.viewer/inspect ,,,]`.)
-  Works in both `clj` and `cljs` contexts; in `cljs` this is equivalent to
-  `clojure.core/comment`."
-     [opts & exprs]
-     (let [[opts exprs] (if (map? opts)
-                          [opts exprs]
-                          [nil (cons opts exprs)])
-           [defns others]
-           ((juxt filter remove)
-            #(when (seq? %)
-               (= 'defn (first %)))
-            exprs)]
-       (when-not (:ns &env)
-         (let [render-fn (if (empty? others)
-                           `(do ~@defns
-                                (fn [_#]))
-                           `(do ~@defns
-                                (fn [_#]
-                                  (let [result# (do ~@others)]
-                                    (nextjournal.clerk.viewer/html
-                                     (if (vector? result#)
-                                       result#
-                                       [nextjournal.clerk.render/inspect result#]))))))]
-           `(clerk/with-viewer
-              (merge {:transform-fn clerk/mark-presented
-                      :render-fn '~render-fn}
-                     ~opts)
-              {}))))
-     ))
-
 ;; # Helitorus
 
 ;; ## UI
@@ -58,28 +21,39 @@
     :r2 0.3
     :r3 0.1}))
 
+(clerk/eval-cljs-str
+ {:evaluator :sci}
+ (pr-str '(set! (.-_BANG_state js/globalThis) !state)))
+
 (comment
-  (user/serve!)
+  (user/serve! {:port 7778})
+  (user/halt!)
   (clerk/clear-cache!)
   )
 
-(show-sci {:evaluator :sci}
-          [:<>
-           [leva.core/Config {:drag true}]
-           [leva.core/Controls
-            {:atom  mathbox.examples.math.heli/!state
-             :schema
-             {:n {:min 0 :max 32 :step 1}
-              :r1 {:min 0 :max 3 :step 0.001}
-              :r2 {:min 0.0 :max 0.5 :step 0.01}
-              :r3 {:min 0.0 :max 0.2 :step 0.01}}}]])
+
+(clerk/with-viewer
+  {:render-fn
+   '(fn [_]
+      [:<>
+       [leva.core/Config {:drag true}]
+       [leva.core/Controls
+        {:atom  mathbox.examples.math.heli/!state
+         :schema
+         {:n {:min 0 :max 32 :step 1}
+          :r1 {:min 0 :max 3 :step 0.001}
+          :r2 {:min 0.0 :max 0.5 :step 0.01}
+          :r3 {:min 0.0 :max 0.2 :step 0.01}}}]])
+   :evaluator :sci}
+  nil)
 
 
 ;; ## Code Emitter
 
 ^{::clerk/visibility :fold}
-(show-sci {:evaluator :cherry}
-          (defn cake2
+(clerk/eval-cljs-str
+ {:evaluator :cherry}
+ (pr-str '(defn cake2
             [emit x63167 x63168 x63169 x63170 x63171 x63172]
             (let
                 [G00000000000000db
@@ -335,55 +309,54 @@
                  G0000000000000243
                  G0000000000000251
                  x63169
-                 G00000000000000f1))))))
+                 G00000000000000f1)))))))
 
 ;; ## Helitorus Component
 
-;; NOTE that we have to do `cljs` to get back. Exports do not currently make it
-;; through the show-cljs process.
+(clerk/eval-cljs-str
+ {:evaluator :cherry}
+ (pr-str
+  '(defn Helitorus [!state f]
+     [mathbox.core/MathBox
+      {:container {:style {:height "500px" :width "100%"}}
+       :threestrap
+       {:plugins ["core", "controls", "cursor", "mathbox" "stats"]}
+       :renderer {:background-color 0xffffff}
+       :scale 500
+       :focus 3}
+      [mathbox.primitives/Camera
+       {:proxy true
+        :position [1 1 3]}]
+      [mathbox.primitives/Cartesian
+       {:range [[-1 1] [-1 1] [-1 1]]
+        :scale [1 1 1]
+        :quaternion [0.7 0 0 0.7]}
+       [:div {:state @!state}
+        [mathbox.primitives/Area
+         {:rangeX [(- Math/PI) Math/PI]
+          :rangeY [(- Math/PI) Math/PI]
+          :width 512
+          :height 16
+          :channels 3
+          :live true
+          :expr (fn [emit theta phi _i _j _t]
+                  (let [{:keys [r1 r2 r3 n]} (.-state !state)]
+                    (f emit r1 r2 r3 n theta phi)))}]]
+       [mathbox.primitives/Surface
+        {:shaded true
+         :color 0xcc0040
+         :lineY true
+         :width 1}]
 
-(show-sci {:evaluator :cherry}
-          (defn Helitorus [!state f]
-            [mathbox.core/MathBox
-             {:container {:style {:height "500px" :width "100%"}}
-              :threestrap
-              {:plugins ["core", "controls", "cursor", "mathbox" "stats"]}
-              :renderer {:background-color 0xffffff}
-              :scale 500
-              :focus 3}
-             [mathbox.primitives/Camera
-              {:proxy true
-               :position [1 1 3]}]
-             [mathbox.primitives/Cartesian
-              {:range [[-1 1] [-1 1] [-1 1]]
-               :scale [1 1 1]
-               :quaternion [0.7 0 0 0.7]}
-              [:div {:state @!state}
-               [mathbox.primitives/Area
-                {:rangeX [(- Math/PI) Math/PI]
-                 :rangeY [(- Math/PI) Math/PI]
-                 :width 512
-                 :height 16
-                 :channels 3
-                 :live true
-                 :expr (fn [emit theta phi _i _j _t]
-                         (let [{:keys [r1 r2 r3 n]} (.-state !state)]
-                           (f emit r1 r2 r3 n theta phi)))}]]
-              [mathbox.primitives/Surface
-               {:shaded true
-                :color 0xcc0040
-                :lineY true
-                :width 1}]
-
-              [mathbox.primitives/Resample {:height 5}]
-              [mathbox.primitives/Line
-               {:color 0xffffff
-                :width 2}]]])
-          (set! (.-Helitorus js/globalThis) Helitorus)
-          nil)
+       [mathbox.primitives/Resample {:height 5}]
+       [mathbox.primitives/Line
+        {:color 0xffffff
+         :width 2}]]])))
 
 ;; ## Animation
 
 ^{::clerk/width :wide}
-(show-sci {:evaluator :cherry}
- [Helitorus !state cake2])
+(clerk/eval-cljs-str
+ {:evaluator :cherry}
+ (pr-str '(nextjournal.clerk.viewer/html
+           [Helitorus !state cake2])))

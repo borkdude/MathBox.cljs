@@ -11,7 +11,7 @@
 (def defaults
   {:index index
    :browse? true
-   :watch-paths ["dev"]
+   ;; :watch-paths ["dev"]
    :cljs-namespaces '[mathbox.sci-extensions]})
 
 (def static-defaults
