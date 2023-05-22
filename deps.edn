@@ -7,22 +7,18 @@
    :extra-deps
    {org.clojure/clojure       {:mvn/version "1.11.1"}
     org.clojure/clojurescript {:mvn/version "1.11.60"}
-    org.mentat/clerk-utils    {:mvn/version "0.4.1"}
+    org.mentat/clerk-utils    {:git/sha "1e0c4473073cadb35f938c6cea5dceeb3f5f95bd"
+                               :git/url "https://github.com/mentat-collective/clerk-utils"} #_{:mvn/version "0.4.1"}
     org.mentat/leva.cljs      {:mvn/version "0.2.2"}
 
     io.github.nextjournal/clerk
-    {:local/root "/Users/borkdude/dev/clerk"}
-    #_{:git/sha "73891f49e37bb21f3f4fffa152c3f7b0713f8d05"}
+    ;; {:local/root "/Users/borkdude/dev/clerk"}
+    {:git/sha "4b959dff5c26d0edba14456f2061ec639af7f11b"}
     io.github.nextjournal/clerk.render
-    #_{:git/url "https://github.com/nextjournal/clerk"
-     :git/sha "73891f49e37bb21f3f4fffa152c3f7b0713f8d05"
-       :deps/root "render"}
-    {:local/root "/Users/borkdude/dev/clerk/render"}
-    io.github.squint-cljs/cherry {;; :git/sha "c1e04ad14a6ca8787b5fcaf645ff5e0372ac535d"
-                                  :local/root "/Users/borkdude/dev/cherry"
-                                  :exclusions [io.github.squint-cljs/squint]} #_{:git/sha "8e01c2c38eea3aba37431da54184dbfd2a3b3951"}
-    io.github.squint-cljs/squint {;; :git/sha "de698509bbf23d0e716a8baeda50204190da7cb2"
-                                  :local/root "/Users/borkdude/dev/squint"}}
+    ;; {:local/root "/Users/borkdude/dev/clerk"}
+    {:git/sha "4b959dff5c26d0edba14456f2061ec639af7f11b"
+     :git/url "https://github.com/nextjournal/clerk"
+     :deps/root "render"}}
    :jvm-opts ["-Dclerk.resource_manifest={\"/js/viewer.js\" \"/js/viewer.js\"}"]
    :exec-fn user/build!}
 
